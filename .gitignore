@@ -216,3 +216,58 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Hugging Face
+.cache/huggingface/
+
+# Données
+data/raw/
+data/cache/
+
+# Checkpoints
+outputs/checkpoints/
+
+# Logs
+outputs/logs/
+
+# Variables d'environnement
+.env
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# Hugging Face cache
+data/cache/
+
+# Checkpoints
+outputs/checkpoints/
+
+# Logs
+outputs/logs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/

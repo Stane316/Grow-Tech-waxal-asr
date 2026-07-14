@@ -1,372 +1,152 @@
-# Software Design Specification (SDS)
-
-# dataset_loader.py
-
-> **Specification ID:** SDS-DATA-001
->
-> **Component:** dataset_loader.py
->
-> **Version:** 1.0.0
->
-> **Status:** Approved for Implementation
->
-> **Category:** Data Layer
->
-> **Project:** Google WAXAL ASR Challenge
->
-> **Organization:** Grow Tech AI Research Lab
+# dataset_loader.py — Technical Specification
 
 ---
 
-# 1. Purpose
+# 1. Overview
 
-This document specifies the complete design of the `dataset_loader.py` component.
+## Script Name
 
-This module is the official entry point for accessing every dataset used throughout the project.
+dataset_loader.py
 
-It abstracts all dataset loading logic behind a unified API.
+## Category
 
-Every component of the project must retrieve data exclusively through this module.
+Data Management
 
----
+## Purpose
 
-# 2. Context
+Provide the official data loading pipeline for the Google WAXAL ASR Challenge.
 
-The Google WAXAL ASR Challenge relies on large speech datasets composed of:
+This script is the single entry point responsible for loading the competition dataset.
 
-- audio files
-- transcriptions
-- metadata
-- predefined splits
-
-Several downstream modules require access to these datasets:
-
-- preprocessing
-- feature extraction
-- training
-- evaluation
-- inference
-- benchmarking
-
-Without a centralized loader, duplicated logic and inconsistent data access would compromise reproducibility.
+It guarantees that every downstream component (training, evaluation, inference) operates exclusively on the official Zindi subset downloaded from Hugging Face.
 
 ---
 
-# 3. Objectives
+# 2. Official Architecture Decision
 
-The component shall:
+Decision ID
 
-- provide a unified interface for dataset loading;
-- support all official dataset splits;
-- validate dataset availability;
-- abstract storage details;
-- expose metadata;
-- support lazy loading;
-- support streaming when available;
-- maximize reusability.
+ADR-001
 
----
+Status
 
-# 4. Scope
+Accepted
 
-Included:
+Rule
 
-- dataset discovery
-- split loading
-- metadata loading
-- local dataset access
-- Hugging Face datasets
-- streaming support
-- caching integration
+Only the dataset samples referenced by the official Zindi metadata files shall be loaded.
 
-Excluded:
-
-- preprocessing
-- augmentation
-- feature extraction
-- validation
-- training
+The loader must never expose recordings outside the competition subset.
 
 ---
 
-# 5. Functional Requirements
+# 3. Responsibilities
 
-## FR-001
+The loader is responsible for
 
-Load the complete dataset.
+✓ loading metadata
 
----
+✓ locating downloaded files
 
-## FR-002
+✓ validating file existence
 
-Load a specific split.
+✓ verifying dataset integrity
 
-Supported values:
+✓ constructing dataset objects
 
-- train
-- validation
-- test
+✓ filtering invalid samples
 
----
+✓ exposing unified APIs
 
-## FR-003
+✓ preparing the dataset for preprocessing
 
-Support loading subsets.
+It is **not** responsible for
 
-Examples:
+training
 
-- first N samples
-- percentage of dataset
-- random subset
+feature extraction
 
----
+tokenization
 
-## FR-004
+augmentation
 
-Support streaming mode.
+evaluation
 
 ---
 
-## FR-005
+# 4. Inputs
 
-Support lazy loading.
+Required inputs
 
----
+data/
 
-## FR-006
+    metadata/
 
-Expose metadata.
+        Train.csv
 
----
+        Validation.csv
 
-## FR-007
+        Test.csv
 
-Return dataset statistics.
+data/
 
----
+    raw/
 
-## FR-008
+        luganda/
 
-Verify dataset existence.
+        lingala/
 
----
+        shona/
 
-## FR-009
+Optional
 
-Validate split names.
+cache/
 
----
-
-## FR-010
-
-Support configurable cache.
+configuration files
 
 ---
 
-## FR-011
+# 5. Outputs
 
-Support deterministic sampling.
+The loader returns
 
----
+Training Dataset
 
-## FR-012
+Validation Dataset
 
-Support configurable batch iteration.
-
----
-
-## FR-013
-
-Provide iterable datasets.
-
----
-
-## FR-014
-
-Support filtering.
-
-Examples:
-
-- duration
-- language
-- speaker
-- recording quality
-
----
-
-## FR-015
-
-Provide unified API.
-
----
-
-# 6. Non-Functional Requirements
-
-The component must:
-
-- remain framework-independent;
-- support large datasets;
-- minimize memory consumption;
-- support streaming;
-- avoid duplicate loading;
-- be deterministic.
-
----
-
-# 7. Public API
-
-Recommended public methods:
-
-```text
-load_dataset()
-
-load_split()
-
-load_train()
-
-load_validation()
-
-load_test()
-
-load_metadata()
-
-dataset_exists()
-
-get_dataset_statistics()
-
-get_available_splits()
-
-create_subset()
-```
-
----
-
-# 8. Inputs
-
-Parameters:
-
-```text
-dataset_name
-
-split
-
-streaming
-
-cache_dir
-
-subset_size
-
-shuffle
-
-seed
-
-batch_size
-```
-
----
-
-# 9. Outputs
-
-Returns:
-
-Dataset object
-
-or
-
-IterableDataset
+Test Dataset
 
 Metadata
 
 Statistics
 
-Exceptions
+Integrity Report
+
+No preprocessing is performed.
 
 ---
 
-# 10. Dependencies
+# 6. Supported Splits
 
-Internal modules:
+The loader shall expose
 
-```text
-metadata_loader.py
+train
 
-cache_manager.py
-```
+validation
 
-External libraries:
+test
 
-```text
-datasets
-
-huggingface_hub
-
-pathlib
-
-logging
-```
+No additional split is authorized.
 
 ---
 
-# 11. Internal Architecture
+# 7. Loading Pipeline
 
-Recommended classes:
-
-```text
-DatasetLoader
-
-DatasetConfig
-
-DatasetStatistics
-```
-
-Recommended helper methods:
-
-```text
-_initialize()
-
-_validate_split()
-
-_load_local()
-
-_load_huggingface()
-
-_apply_subset()
-
-_apply_streaming()
-
-_compute_statistics()
-
-_load_metadata()
-```
-
-Single Responsibility Principle must be respected.
-
----
-
-# 12. Processing Flow
-
-```text
-User Request
+Initialize Configuration
 
 ↓
 
-Validate Parameters
-
-↓
-
-Locate Dataset
-
-↓
-
-Validate Split
-
-↓
-
-Check Cache
-
-↓
-
-Load Dataset
+Verify Folder Structure
 
 ↓
 
@@ -374,265 +154,342 @@ Load Metadata
 
 ↓
 
-Compute Statistics
+Validate Metadata
 
 ↓
 
-Return Dataset Object
-```
+Extract Audio IDs
+
+↓
+
+Locate Local Audio
+
+↓
+
+Verify File Existence
+
+↓
+
+Validate Audio
+
+↓
+
+Create Dataset Objects
+
+↓
+
+Generate Statistics
+
+↓
+
+Return Dataset
 
 ---
 
-# 13. Data Model
+# 8. Metadata Loading
 
-The loader shall expose a unified sample format.
+Load
 
-Example:
+Train.csv
 
-```text
-Sample
+Validation.csv
 
-audio
+Test.csv
 
-transcription
+Extract
 
-speaker_id
+sample_id
 
 language
 
-duration
+transcription
 
-sampling_rate
+audio_path
 
-metadata
-```
+duration (if available)
 
-Every downstream module must receive the same structure.
+speaker (if available)
 
----
-
-# 14. Configuration
-
-Configuration should come from YAML.
-
-Example fields:
-
-```yaml
-dataset:
-  name:
-  cache_dir:
-  streaming:
-  batch_size:
-  shuffle:
-  seed:
-```
-
-No hardcoded paths are allowed.
+Store internally.
 
 ---
 
-# 15. Logging Requirements
+# 9. Audio Resolution
 
-INFO
+Each metadata row must resolve to
 
-- dataset loaded
-- split selected
+data/raw/<language>/<audio_file>
 
-WARNING
+Missing files are rejected.
 
-- missing metadata
-- partial dataset
+---
 
-ERROR
+# 10. Dataset Validation
 
-- invalid split
-- dataset not found
+Before returning data verify
 
-DEBUG
+✓ metadata consistency
 
-- loading details
+✓ file existence
+
+✓ readable audio
+
+✓ transcription present
+
+✓ language valid
+
+✓ duplicate IDs
+
+✓ duplicate files
+
+✓ corrupted recordings
+
+Validation is mandatory.
+
+---
+
+# 11. Supported Languages
+
+Official languages
+
+Luganda
+
+Lingala
+
+Shona
+
+No additional language.
+
+---
+
+# 12. Filtering Policy
+
+Reject
+
+missing transcription
+
+missing audio
+
+unknown language
+
+duplicate sample ID
+
+empty recording
+
+corrupted audio
+
+invalid metadata
+
+Generate warnings.
+
+---
+
+# 13. Statistics
+
+Generate
+
+number of samples
+
+samples per split
+
+samples per language
+
+duration statistics
+
+missing samples
+
+invalid samples
+
+duplicate samples
+
+These statistics are returned with the dataset.
+
+---
+
+# 14. Caching
+
+The loader shall support
+
+cache reuse
+
+lazy loading
+
+memory-efficient loading
+
+No duplicate cache generation.
+
+---
+
+# 15. Public API
+
+The implementation should expose functions similar to
+
+load_train()
+
+load_validation()
+
+load_test()
+
+load_all()
+
+load_split(split_name)
+
+load_metadata()
+
+get_statistics()
+
+validate_dataset()
+
+The exact implementation may evolve, but these capabilities are mandatory.
 
 ---
 
 # 16. Error Handling
 
-Handle gracefully:
+Handle
 
-- missing dataset
-- invalid split
-- corrupted metadata
-- inaccessible storage
-- unsupported format
-- invalid configuration
+missing metadata
 
-Never terminate unexpectedly.
+missing folders
 
----
+missing audio
 
-# 17. Testing Strategy
+unsupported language
 
-Unit Tests
+invalid CSV
 
-- load split
-- metadata
-- statistics
-- subsets
+corrupted files
 
-Integration Tests
+permission errors
 
-- complete dataset loading
+cache errors
 
-Negative Tests
-
-- invalid split
-- missing files
-- empty dataset
-
-Regression Tests
-
-- deterministic loading
-- cache consistency
+Meaningful exceptions shall be raised.
 
 ---
 
-# 18. Quality Criteria
+# 17. Logging
 
-Accepted if:
+Generate
 
-✓ all splits load correctly
+logs/dataset.log
 
-✓ metadata available
+Log
 
-✓ statistics accurate
+dataset loading
 
-✓ streaming supported
+split loaded
 
-✓ tests successful
+validation status
 
-✓ documentation updated
+missing samples
 
----
+duplicates
 
-# 19. Performance Constraints
+loading time
 
-Support datasets exceeding 1 TB.
+errors
 
-Lazy loading preferred.
-
-Streaming preferred.
-
-Memory footprint must remain low.
-
-No duplicated loading.
+warnings
 
 ---
 
-# 20. Security Requirements
+# 18. Performance Requirements
 
-The loader shall never:
+The loader shall
 
-- modify dataset contents;
-- overwrite files;
-- expose authentication tokens;
-- silently ignore corrupted data.
+avoid duplicate scans
 
----
+use caching
 
-# 21. Future Extensions
+support lazy loading
 
-Possible improvements:
+minimize memory usage
 
-- distributed loading
-- multi-node support
-- cloud storage
-- remote datasets
-- dataset versioning
-- automatic integrity verification
+reuse metadata
+
+support thousands of files
 
 ---
 
-# 22. Related Components
+# 19. Dependencies
 
-Direct dependencies:
+datasets
 
-```text
+pandas
+
+numpy
+
+soundfile
+
+pathlib
+
+logging
+
+typing
+
+---
+
+# 20. Integration
+
+Used by
+
+dataset_validator.py
+
 metadata_loader.py
 
 cache_manager.py
-```
 
-Used by:
+preprocessing pipeline
 
-```text
-audio_preprocessor.py
+feature extraction
 
-text_preprocessor.py
+training pipeline
 
-trainer.py
+evaluation pipeline
 
-evaluation_pipeline.py
-
-predictor.py
-```
+inference pipeline
 
 ---
 
-# 23. Acceptance Checklist
+# 21. Acceptance Criteria
 
-Implementation is accepted when:
+The specification is satisfied when
 
-- all functional requirements satisfied;
-- all dataset splits accessible;
-- deterministic behavior verified;
-- tests pass;
-- documentation synchronized.
+✓ only official Zindi samples are loaded
 
----
+✓ every split is reproducible
 
-# 24. Deliverables
+✓ dataset validation succeeds
 
-Implementation
+✓ no external recordings appear
 
-```text
-src/data/dataset_loader.py
-```
+✓ statistics generated
 
-Associated tests
+✓ logs generated
 
-```text
-tests/data/test_dataset_loader.py
-```
+✓ corrupted samples rejected
 
-Related documentation
-
-```text
-docs/research/01_Dataset_Audit.md
-
-docs/research/02_Dataset_Anatomy.md
-
-docs/setup/05_first_run.md
-```
-
-Specification
-
-```text
-specifications/data/dataset_loader.md
-```
+✓ loader reusable by all modules
 
 ---
 
-# 25. Revision History
+# 22. Future Improvements
 
-| Version | Date       | Author       | Changes               |
-| ------- | ---------- | ------------ | --------------------- |
-| 1.0.0   | YYYY-MM-DD | Grow Tech AI | Initial specification |
+Support
 
----
+streaming datasets
 
-# 26. Conclusion
+distributed loading
 
-This specification defines the implementation contract for `dataset_loader.py`.
+parallel loading
 
-The component acts as the official Data Access Layer of the Grow Tech AI Research Lab, ensuring that every downstream module accesses datasets through a consistent, validated and reproducible interface.
+memory mapping
 
-Its design emphasizes modularity, scalability and long-term reuse across future hackathons and AI research projects.
+incremental loading
+
+automatic dataset versioning
+
+remote storage
+
+dataset fingerprinting

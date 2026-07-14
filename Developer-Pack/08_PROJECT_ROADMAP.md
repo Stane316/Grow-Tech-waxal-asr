@@ -42,6 +42,23 @@ Progression is sequential, but experimentation remains iterative.
 
 ---
 
+# 2.1 Official Architecture Strategy
+
+The project follows a convergence strategy rather than maintaining multiple
+parallel model pipelines.
+
+The roadmap distinguishes:
+
+- exploratory research;
+- architecture selection;
+- official multilingual pipeline;
+- optimization of the selected architecture.
+
+After the architecture selection milestone, every engineering effort targets
+one official multilingual model.
+
+Alternative models remain benchmark references only.
+
 # 3. Global Roadmap Overview
 
 ```
@@ -61,11 +78,15 @@ Baseline
 
 ↓
 
-Research
+Architecture Benchmark
 
 ↓
 
-Model Development
+Official Model Selection
+
+↓
+
+Multilingual Development
 
 ↓
 
@@ -253,39 +274,44 @@ Planned
 
 ---
 
-# 9. Program 5 — Model Benchmarking
+# 9. Program 5 — Architecture Selection
 
 ## Objective
 
-Compare multiple ASR architectures.
+Identify and validate the multilingual architecture that will become the
+official competition model.
+
+### Activities
+
+- reproduce official baseline
+- benchmark candidate multilingual architectures
+- evaluate transfer learning capabilities
+- compare computational requirements
+- compare multilingual robustness
+- analyze engineering complexity
 
 ### Candidate Models
 
-Gemma
-
-Whisper
-
-HuBERT
-
-wav2vec2
-
-Future multilingual models
+- Gemma 3n
+- Whisper
+- MMS
+- SeamlessM4T
+- Future multilingual architectures
 
 ### Deliverables
 
-Benchmark report
+Architecture benchmark report
 
-Comparison tables
+Decision report
 
-Performance analysis
+Official architecture selection
 
-Decision log
+Model comparison matrix
 
 ### Success Criteria
 
-Comparable evaluation pipeline.
-
-Consistent benchmarking.
+One official multilingual architecture is selected and frozen for the
+remainder of the project.
 
 ### Status
 
@@ -312,6 +338,12 @@ Prompt optimization
 Decoder optimization
 
 Regularization
+
+Official Scope
+
+Only the architecture selected during Program 5 shall be optimized.
+
+Benchmark models are no longer modified except for comparison purposes.
 
 ### Deliverables
 
@@ -344,6 +376,14 @@ Unknown languages
 Noise robustness
 
 Distribution shift
+
+Research Focus
+
+Evaluate multilingual robustness across Luganda, Lingala and Shona using the
+official multilingual model.
+
+Per-language analyses are performed without training separate production
+models.
 
 ### Deliverables
 
@@ -417,18 +457,18 @@ Continuous
 
 # 14. Milestones
 
-| Milestone | Description             | Status      |
-| --------- | ----------------------- | ----------- |
-| M1        | Repository initialized  | Completed   |
-| M2        | Environment validated   | Completed   |
-| M3        | Dataset loaded          | In Progress |
-| M4        | Baseline reproduced     | Planned     |
-| M5        | EDA completed           | Planned     |
-| M6        | First benchmark         | Planned     |
-| M7        | Optimized model         | Planned     |
-| M8        | Final submission        | Pending     |
-| M9        | Documentation finalized | Pending     |
-
+| Milestone |          Description                       | Status      |
+| --------- | -------------------------------------------| ----------- |
+| M1        | Repository initialized                     | Completed   |
+| M2        | Environment validated                      | Completed   |
+| M3        | Dataset loaded                             | In Progress |
+| M4        | Baseline reproduced                        | Planned     |
+| M5        | EDA completed                              | Planned     |
+| M5A       | Official multilingual architecture selecte | Planned     |
+| M6        | First benchmark                            | Planned     |
+| M7        | Optimized model                            | Planned     |
+| M8        | Final submission                           | Pending     |
+| M9        | Documentation finalized                    | Pending     |
 ---
 
 # 15. Dependencies
@@ -452,11 +492,23 @@ EDA
 
 ↓
 
-Benchmark
+Architecture Benchmark
+
+↓
+
+Architecture Selection
+
+↓
+
+Official Multilingual Pipeline
 
 ↓
 
 Optimization
+
+↓
+
+Submission
 
 ↓
 
@@ -491,7 +543,31 @@ Competition
 - Improved WER
 - Strong Phase 2 performance
 
+Architecture
+
+- Official multilingual model selected
+- Single production pipeline
+- Stable engineering architecture
 ---
+
+# Official Roadmap Constraints
+
+After Program 5
+
+✓ only one production model
+
+✓ one training pipeline
+
+✓ one preprocessing pipeline
+
+✓ one evaluation pipeline
+
+✓ one inference pipeline
+
+✓ one submission pipeline
+
+Benchmark models remain archived for research purposes only.
+
 
 # 17. Risk Management
 
@@ -619,3 +695,32 @@ Any delay on this path delays the entire project.
 The Google WAXAL ASR Challenge is the first implementation of the Grow Tech AI Research Lab methodology.
 
 The long-term objective is to evolve this repository into a reusable AI research framework supporting future hackathons, industrial AI projects and academic research while continuously enriching the laboratory's engineering standards.
+
+
+# Appendix D — Official Multilingual Strategy
+
+Research Stage
+
+↓
+
+Architecture Benchmark
+
+↓
+
+Architecture Selection
+
+↓
+
+Official Multilingual Model
+
+↓
+
+Optimization
+
+↓
+
+Competition Submission
+
+↓
+
+Reusable Framework

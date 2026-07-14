@@ -1,639 +1,465 @@
-# Software Design Specification (SDS)
-
-# download_dataset.py
-
-> **Specification ID:** SDS-INFRA-002
->
-> **Component:** download_dataset.py
->
-> **Version:** 1.0.0
->
-> **Status:** Approved for Implementation
->
-> **Category:** Infrastructure
->
-> **Project:** Google WAXAL ASR Challenge
->
-> **Organization:** Grow Tech AI Research Lab
+# download_dataset.py — Technical Specification
 
 ---
 
-# 1. Purpose
+# 1. Overview
 
-This document specifies the complete design of the `download_dataset.py` script.
+## Script Name
 
-The purpose of this component is to automate the secure acquisition, validation and organization of all datasets required by the Google WAXAL ASR Challenge.
+download_dataset.py
 
-The script is responsible for ensuring that every contributor and every AI assistant works with the exact same dataset version.
+## Category
 
----
+Infrastructure
 
-# 2. Context
+## Purpose
 
-The Google WAXAL ASR Challenge relies on datasets distributed through Hugging Face.
+Download only the dataset samples required for the Google WAXAL ASR Challenge.
 
-Downloading these datasets manually introduces risks such as:
+This script **must not** download the entire Hugging Face dataset.
 
-- incomplete downloads;
-- inconsistent dataset versions;
-- corrupted files;
-- incorrect directory structures;
-- accidental overwrites.
+Instead, it must download only the audio samples referenced by the official Zindi metadata files.
 
-This component standardizes the entire acquisition process.
+This specification supersedes all previous download strategies.
 
 ---
 
-# 3. Objectives
+# 2. Background
 
-The script shall:
+The official WAXAL dataset hosted on Hugging Face contains a much larger collection of recordings than those required for the competition.
 
-- authenticate with Hugging Face when required;
-- download the official dataset;
-- organize the dataset according to the repository structure;
-- validate download integrity;
-- resume interrupted downloads when possible;
-- generate acquisition reports.
+The competition organizers provide official metadata files:
 
-The script shall never modify dataset contents.
+- Train.csv
+- Validation.csv
+- Test.csv
 
----
+These files define the exact subset used during the challenge.
 
-# 4. Scope
+Downloading the full dataset would:
 
-Included:
+- waste bandwidth;
+- waste disk space;
+- slow down preprocessing;
+- complicate dataset validation;
+- reduce reproducibility.
 
-- Hugging Face authentication check
-- Dataset download
-- Split management
-- Local directory creation
-- Integrity verification
-- Metadata generation
-- Download report generation
-- Progress display
-
-Excluded:
-
-- Data preprocessing
-- Dataset validation
-- Feature extraction
-- Model training
-- Dataset modification
+Therefore the project adopts a filtered download strategy.
 
 ---
 
-# 5. Functional Requirements
+# 3. Official Decision
 
-## FR-001
+Decision ID:
 
-Verify internet connectivity.
+ADR-001
 
----
+Status:
 
-## FR-002
+Accepted
 
-Verify Hugging Face authentication.
+Rule:
 
----
+Only download samples whose IDs appear in the official Zindi metadata.
 
-## FR-003
-
-Verify available disk space.
+Downloading the full Hugging Face dataset is forbidden.
 
 ---
 
-## FR-004
+# 4. Inputs
 
-Create required directories.
+The script expects:
 
----
+• Hugging Face authentication token
 
-## FR-005
+• Accepted Gemma 3n license
 
-Download official dataset.
+• HF_HOME configured
 
----
+• Project directory structure initialized
 
-## FR-006
+• Metadata files
 
-Support download resumption.
-
----
-
-## FR-007
-
-Verify downloaded files.
+    data/
+        metadata/
+            Train.csv
+            Validation.csv
+            Test.csv
 
 ---
 
-## FR-008
+# 5. Outputs
 
-Generate metadata.
+The script produces
 
----
-
-## FR-009
-
-Display download progress.
-
----
-
-## FR-010
-
-Generate download summary.
-
----
-
-## FR-011
-
-Support partial downloads.
-
-Possible subsets:
-
-- train
-- validation
-- test
-- all
-
----
-
-## FR-012
-
-Prevent accidental overwrite unless explicitly authorized.
-
----
-
-## FR-013
-
-Generate download log.
-
----
-
-## FR-014
-
-Generate machine-readable report.
-
----
-
-## FR-015
-
-Return execution status.
-
----
-
-# 6. Non-Functional Requirements
-
-The script must:
-
-- support Windows, Linux and macOS;
-- resume interrupted downloads;
-- minimize unnecessary downloads;
-- avoid duplicate files;
-- provide deterministic directory structures.
-
----
-
-# 7. Inputs
-
-Mandatory:
-
-None.
-
-Optional CLI arguments:
-
-```text
---dataset-id
---split
---output-dir
---force
---resume
---verify
---report
---quiet
---verbose
---dry-run
-```
-
----
-
-# 8. Outputs
-
-Generated directory:
-
-```text
 data/
 
-train/
+    raw/
 
-validation/
+        luganda/
 
-test/
+        lingala/
 
-metadata/
-```
+        shona/
 
-Generated reports:
+Only the required files.
 
-```text
-download_report.json
-
-download_report.md
-```
-
-Exit code.
-
-Console summary.
+No unused recordings.
 
 ---
 
-# 9. Exit Codes
+# 6. Download Pipeline
 
-| Code | Meaning               |
-| ---- | --------------------- |
-| 0    | Success               |
-| 1    | Warning               |
-| 2    | Download failed       |
-| 3    | Authentication failed |
-| 4    | Storage insufficient  |
+The official pipeline is
+
+Initialize Environment
+
+↓
+
+Load Metadata
+
+↓
+
+Extract Audio IDs
+
+↓
+
+Remove Duplicates
+
+↓
+
+Authenticate Hugging Face
+
+↓
+
+Verify Dataset Access
+
+↓
+
+Download Required Samples
+
+↓
+
+Verify Download Integrity
+
+↓
+
+Generate Download Report
+
+↓
+
+Finish
 
 ---
 
-# 10. Dependencies
+# 7. Metadata Processing
 
-## Standard Library
+The script shall
 
-- pathlib
-- os
-- shutil
-- json
-- logging
-- hashlib
-- argparse
+Load
 
----
+Train.csv
 
-## Third-party
+Validation.csv
 
-- datasets
-- huggingface_hub
-- tqdm
-- requests
+Test.csv
 
----
+Extract every audio identifier.
 
-# 11. Internal Architecture
+Merge all identifiers.
 
-Recommended modules:
+Remove duplicates.
 
-```
-main()
-
-↓
-
-parse_arguments()
-
-↓
-
-check_environment()
-
-↓
-
-prepare_directories()
-
-↓
-
-download_dataset()
-
-↓
-
-verify_download()
-
-↓
-
-generate_metadata()
-
-↓
-
-generate_reports()
-
-↓
-
-print_summary()
-```
-
-Recommended helper functions:
-
-```
-check_disk_space()
-
-check_connection()
-
-check_huggingface()
-
-prepare_output_directory()
-
-download_split()
-
-verify_files()
-
-compute_checksums()
-
-generate_json_report()
-
-generate_markdown_report()
-```
-
-Each function must have a single responsibility.
+Create one unified download list.
 
 ---
 
-# 12. Processing Flow
+# 8. Download Strategy
 
-```
-Start
+The implementation shall
 
-↓
+Never iterate over the entire dataset.
 
-Parse CLI arguments
+Instead
 
-↓
+For each required ID
 
-Check environment
+Locate the corresponding sample
 
-↓
+Download audio
 
-Authenticate
+Download transcription
 
-↓
+Download metadata
 
-Check storage
+Store locally
 
-↓
+Continue
 
-Create folders
-
-↓
-
-Download requested splits
-
-↓
-
-Verify integrity
-
-↓
-
-Generate metadata
-
-↓
-
-Generate reports
-
-↓
-
-Exit
-```
+This dramatically reduces download time.
 
 ---
 
-# 13. Directory Structure
+# 9. Directory Structure
 
-Expected output:
-
-```text
 data/
 
-raw/
+    metadata/
 
-train/
+        Train.csv
 
-validation/
+        Validation.csv
 
-test/
+        Test.csv
 
-metadata/
+    raw/
 
-reports/
-```
+        luganda/
 
-Metadata examples:
+        lingala/
 
-```
-dataset_info.json
+        shona/
 
-download_manifest.json
+    cache/
 
-checksums.json
-```
+    reports/
 
 ---
 
-# 14. Logging Requirements
+# 10. Hugging Face Configuration
 
-INFO
+HF_HOME shall be
 
-- download started
-- split completed
-- verification completed
+cache/huggingface/
 
-WARNING
+No global cache may be used.
 
-- low disk space
-- skipped files
+Authentication is mandatory.
 
-ERROR
+huggingface-cli login
 
-- authentication failure
-- corrupted files
-- network interruption
-
-DEBUG
-
-- internal operations
+must succeed before execution.
 
 ---
 
-# 15. Error Handling
+# 11. Download Validation
 
-Handle gracefully:
+For every downloaded sample verify
 
-- no internet connection
-- authentication failure
-- dataset unavailable
-- insufficient storage
-- interrupted download
-- corrupted files
-- permission denied
-- invalid output directory
+✓ audio exists
 
-No unexpected crash is acceptable.
+✓ metadata exists
 
----
+✓ transcription exists
 
-# 16. Testing Strategy
+✓ language exists
 
-Unit Tests
+✓ checksum (if available)
 
-- authentication
-- directory creation
-- integrity verification
+✓ readable audio
 
-Integration Tests
-
-- full dataset download
-- partial download
-- resumed download
-
-Negative Tests
-
-- invalid dataset
-- invalid credentials
-- disconnected network
-- insufficient storage
-
-Regression Tests
-
-- repeated downloads
-- existing datasets
+Invalid samples are reported.
 
 ---
 
-# 17. Quality Criteria
+# 12. Failure Management
 
-Implementation is accepted if:
+Possible failures
 
-✓ official dataset downloads successfully
+Missing token
 
-✓ directory structure is respected
+↓
 
-✓ reports are generated
+Authentication error
 
-✓ interrupted downloads can resume
+↓
 
-✓ verification succeeds
+Dataset access denied
 
-✓ tests pass
+↓
+
+License not accepted
+
+↓
+
+Network timeout
+
+↓
+
+Missing metadata
+
+↓
+
+Corrupted audio
+
+↓
+
+Interrupted download
+
+Each error must be logged.
+
+Recovery must be supported.
 
 ---
 
-# 18. Performance Constraints
+# 13. Logging
 
-Support datasets larger than 1 TB.
+Generate
+
+logs/download.log
+
+Log
+
+start time
+
+end time
+
+download speed
+
+downloaded samples
+
+missing samples
+
+failed samples
+
+warnings
+
+errors
+
+---
+
+# 14. Progress Reporting
+
+Console output shall display
+
+Current split
+
+Current language
+
+Downloaded files
+
+Remaining files
+
+Estimated remaining time
+
+Download percentage
+
+---
+
+# 15. Generated Reports
+
+At completion generate
+
+reports/download_report.json
+
+reports/download_summary.md
+
+Reports include
+
+Total requested files
+
+Downloaded files
+
+Missing files
+
+Failed files
+
+Elapsed time
+
+Dataset size
+
+Average download speed
+
+---
+
+# 16. Performance Requirements
+
+The implementation shall
 
 Avoid duplicate downloads.
 
-Streaming preferred whenever supported.
+Support resume.
 
-Memory footprint should remain minimal.
+Support caching.
 
----
+Minimize API requests.
 
-# 19. Security Requirements
-
-The script must never:
-
-- expose Hugging Face tokens;
-- print authentication credentials;
-- modify downloaded files;
-- overwrite existing datasets without confirmation.
+Parallelize downloads when possible.
 
 ---
 
-# 20. Future Extensions
+# 17. Security
 
-Potential improvements:
+Never log
 
-- multi-threaded downloads
-- dataset mirroring
-- checksum verification against official manifests
-- cloud storage support
-- Google Drive export
-- S3 export
-- Azure Blob support
-- automatic dataset version comparison
+HF token
 
----
+API keys
 
-# 21. Related Components
+Private credentials
 
-Dependent components:
-
-```
-dataset_loader.py
-
-dataset_validator.py
-
-metadata_loader.py
-
-cache_manager.py
-```
-
-Related documentation:
-
-```
-docs/setup/
-
-docs/research/
-
-Developer-Pack/
-```
+Temporary credentials
 
 ---
 
-# 22. Acceptance Checklist
+# 18. Dependencies
 
-Implementation is accepted when:
+datasets
 
-- all functional requirements satisfied;
-- official dataset downloaded;
-- integrity verified;
-- metadata generated;
-- documentation updated;
-- tests successful.
+huggingface_hub
 
----
+pandas
 
-# 23. Deliverables
+tqdm
 
-Implementation
+pathlib
 
-```
-scripts/download_dataset.py
-```
+logging
 
-Tests
+hashlib
 
-```
-tests/test_download_dataset.py
-```
-
-Documentation
-
-```
-docs/setup/05_first_run.md
-
-docs/research/01_Dataset_Audit.md
-```
-
-Specification
-
-```
-specifications/infrastructure/download_dataset.md
-```
+soundfile
 
 ---
 
-# 24. Revision History
+# 19. Acceptance Criteria
 
-| Version | Date       | Author       | Changes               |
-| ------- | ---------- | ------------ | --------------------- |
-| 1.0.0   | YYYY-MM-DD | Grow Tech AI | Initial specification |
+The specification is considered satisfied when
+
+✓ only Zindi samples are downloaded
+
+✓ no extra recordings exist
+
+✓ metadata matches downloaded files
+
+✓ reports generated
+
+✓ validation successful
+
+✓ reproducible download
+
+✓ cache reused
+
+✓ logs generated
 
 ---
 
-# 25. Conclusion
+# 20. Future Improvements
 
-This specification defines the complete contract for the implementation of `download_dataset.py`.
+Support
 
-The component guarantees that every contributor acquires the official dataset in a consistent, reproducible and verifiable manner.
+automatic retries
 
-It establishes the foundation for all downstream data engineering, preprocessing, training and evaluation tasks, ensuring that every experiment conducted within the Grow Tech AI Research Lab starts from an identical and trusted dataset.
+download queue
+
+mirror servers
+
+download checksum verification
+
+download manifest
+
+parallel workers
+
+incremental updates
+
+offline validation

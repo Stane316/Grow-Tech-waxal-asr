@@ -1,677 +1,593 @@
-# Software Design Specification (SDS)
+# cache_manager.py — Software Specification
 
-# cache_manager.py
+Version: 2.0
 
-> **Specification ID:** SDS-DATA-004
->
-> **Component:** cache_manager.py
->
-> **Version:** 1.0.0
->
-> **Status:** Approved for Implementation
->
-> **Category:** Data Layer
->
-> **Project:** Google WAXAL ASR Challenge
->
-> **Organization:** Grow Tech AI Research Lab
+Status: Approved
+
+Category: Infrastructure
+
+Priority: High
 
 ---
 
 # 1. Purpose
 
-This document specifies the complete design of the `cache_manager.py` component.
+## Objective
 
-The purpose of this module is to centralize the creation, retrieval, validation, expiration and cleanup of all cached artifacts generated during the project lifecycle.
+Provide a centralized cache management system for the entire Google WAXAL ASR project.
 
-It is the official cache service of the Grow Tech AI Research Lab.
+The Cache Manager is responsible for discovering, monitoring, validating, cleaning and optimizing every cache used by the project.
 
----
-
-# 2. Context
-
-Machine Learning workflows repeatedly compute expensive operations such as:
-
-- dataset loading;
-- metadata indexing;
-- feature extraction;
-- preprocessing;
-- tokenization;
-- statistics generation;
-- model inference.
-
-Without a cache layer, these operations are unnecessarily repeated.
-
-The Cache Manager eliminates redundant computations while preserving reproducibility.
+Its goal is to improve reproducibility, reduce storage consumption and avoid unnecessary downloads or recomputations.
 
 ---
 
-# 3. Objectives
+# 2. Background
 
-The component shall:
+The project uses several caching mechanisms:
 
-- manage cache storage;
-- store reusable artifacts;
-- retrieve cached artifacts;
-- validate cache integrity;
-- invalidate outdated cache;
-- support cache versioning;
-- monitor cache usage;
-- generate cache statistics.
+- Hugging Face datasets cache
+- Hugging Face models cache
+- Arrow datasets
+- Feature extraction cache
+- Tokenization cache
+- Preprocessing cache
+- Experiment cache
 
----
+Without centralized management these caches may:
 
-# 4. Scope
-
-Included:
-
-- cache creation
-- cache lookup
-- cache validation
-- cache expiration
-- cache deletion
-- cache statistics
-- cache indexing
-- cache versioning
-
-Excluded:
-
-- dataset download
-- preprocessing
-- training
-- model serialization
+- consume hundreds of gigabytes
+- become corrupted
+- contain obsolete files
+- produce inconsistent experiments
+- slow down development
 
 ---
 
-# 5. Functional Requirements
+# 3. Responsibilities
 
-## FR-001
+The Cache Manager must:
 
-Create cache directories automatically.
+✔ discover cache directories
 
----
+✔ compute cache statistics
 
-## FR-002
+✔ validate cache integrity
 
-Store cache entries.
+✔ detect corrupted cache
 
----
+✔ clean obsolete cache
 
-## FR-003
+✔ purge selected cache
 
-Retrieve cache entries.
+✔ preserve active cache
 
----
+✔ display cache usage
 
-## FR-004
+✔ optimize disk usage
 
-Delete cache entries.
-
----
-
-## FR-005
-
-Invalidate obsolete cache.
+✔ generate cache reports
 
 ---
 
-## FR-006
+# 4. Supported Cache Types
 
-Verify cache integrity.
+The manager must support
 
----
+HF_DATASETS_CACHE
 
-## FR-007
+HF_HOME
 
-Support cache namespaces.
+HF_HUB_CACHE
 
-Namespaces include:
+Arrow cache
 
-- datasets
-- metadata
-- preprocessing
-- features
-- training
-- evaluation
-- inference
+Feature cache
 
----
+Embedding cache
 
-## FR-008
+Tokenization cache
 
-Support cache versioning.
+Experiment cache
 
----
+Temporary cache
 
-## FR-009
+Logs cache
 
-Support configurable cache lifetime.
+Python __pycache__
 
 ---
 
-## FR-010
+# 5. Inputs
 
-Support cache statistics.
+Configuration
+
+```text
+configs/
+
+paths.py
+
+dataset.py
+
+training.py
+```
+
+Project structure
+
+```text
+cache/
+
+data/
+
+outputs/
+
+logs/
+```
+
+Environment variables
+
+```text
+HF_HOME
+
+HF_DATASETS_CACHE
+
+HF_HUB_CACHE
+```
 
 ---
 
-## FR-011
+# 6. Outputs
 
-Compute cache size.
+Generated reports
 
----
+```text
+reports/
 
-## FR-012
+cache_report.json
 
-List cache entries.
+cache_statistics.json
 
----
+cache_cleanup.log
+```
 
-## FR-013
+Optional
 
-Search cache.
+```text
+cache/
 
----
-
-## FR-014
-
-Support selective cleanup.
-
----
-
-## FR-015
-
-Generate cache reports.
-
----
-
-# 6. Non-Functional Requirements
-
-The component must:
-
-- be deterministic;
-- minimize disk usage;
-- minimize duplicated artifacts;
-- support large caches;
-- remain platform independent.
+archive/
+```
 
 ---
 
 # 7. Public API
 
-Recommended public methods:
+The manager exposes
 
-```text
-initialize()
+scan()
 
-put()
+summary()
 
-get()
+statistics()
 
-exists()
+verify()
 
-remove()
+clean()
 
-clear()
+purge()
 
-clear_namespace()
+purge_hf()
 
-list_entries()
+purge_features()
 
-invalidate()
+purge_models()
 
-compute_statistics()
+purge_temp()
 
-generate_report()
-```
+archive()
 
----
+restore()
 
-# 8. Inputs
+disk_usage()
 
-Parameters:
-
-```text
-key
-
-namespace
-
-version
-
-ttl
-
-artifact
-
-metadata
-
-force
-
-overwrite
-```
+health()
 
 ---
 
-# 9. Outputs
+# 8. Workflow
 
-Returns:
+Load configuration
 
-```text
-CacheEntry
+↓
 
-CacheStatistics
+Locate caches
 
-CacheReport
-```
+↓
 
-Generated reports:
+Scan directories
+
+↓
+
+Compute statistics
+
+↓
+
+Validate integrity
+
+↓
+
+Identify obsolete files
+
+↓
+
+Clean or archive
+
+↓
+
+Generate reports
+
+↓
+
+Return status
+
+---
+
+# 9. Cache Discovery
+
+Automatically detect
+
+HF cache
+
+Arrow cache
+
+Tokenizers
+
+PyTorch checkpoints cache
+
+Temporary files
+
+Logs
+
+Python cache
+
+Hidden cache folders
+
+---
+
+# 10. Integrity Verification
+
+Verify
+
+✔ readable
+
+✔ accessible
+
+✔ non corrupted
+
+✔ metadata consistent
+
+✔ no orphan cache
+
+✔ no duplicated cache
+
+✔ valid permissions
+
+---
+
+# 11. Cleaning Policies
+
+Support
+
+Safe Clean
+
+Only temporary files
+
+↓
+
+Selective Clean
+
+Selected cache types
+
+↓
+
+Full Clean
+
+Everything except protected cache
+
+↓
+
+Force Purge
+
+Delete everything
+
+Confirmation required.
+
+---
+
+# 12. Cache Protection
+
+Protected caches
+
+Downloaded datasets
+
+Official checkpoints
+
+Experiment logs
+
+Best models
+
+Reports
+
+Never delete automatically.
+
+---
+
+# 13. Statistics
+
+Compute
+
+Disk usage
+
+Number of files
+
+Largest folders
+
+Cache age
+
+Unused cache
+
+Duplicate cache
+
+Estimated recoverable space
+
+---
+
+# 14. Reports
+
+Generate
 
 ```text
 cache_report.json
+```
 
-cache_report.md
+Containing
+
+Cache inventory
+
+Health
+
+Warnings
+
+Errors
+
+Recommendations
+
+---
+
+Generate
+
+```text
+cache_statistics.json
+```
+
+Containing
+
+Size
+
+Age
+
+Usage
+
+Cleanup opportunities
+
+---
+
+# 15. Logging
+
+Generate
+
+```text
+logs/cache_manager.log
+```
+
+Log
+
+Operations
+
+Duration
+
+Warnings
+
+Errors
+
+Deleted files
+
+Recovered space
+
+---
+
+# 16. CLI
+
+Default
+
+```bash
+python scripts/cache_manager.py
+```
+
+Options
+
+```bash
+--scan
+
+--stats
+
+--verify
+
+--clean
+
+--purge
+
+--archive
+
+--restore
+
+--dry-run
+
+--verbose
+
+--json
 ```
 
 ---
 
-# 10. Dependencies
+# 17. Error Handling
 
-Internal modules:
+Recoverable
 
-```text
-metadata_loader.py
+Missing cache
+
+Permission denied
+
+Temporary lock
+
+Retry.
+
+Fatal
+
+Corrupted protected cache
+
+Configuration error
+
+Abort operation.
+
+---
+
+# 18. Performance Requirements
+
+Memory
+
+< 2 GB
+
+Parallel scanning
+
+Incremental scanning
+
+Fast startup
+
+Progress bars
+
+---
+
+# 19. Unit Tests
+
+Verify
+
+Scan
+
+Statistics
+
+Cleanup
+
+Archive
+
+Restore
+
+Protected cache
+
+HF cache
+
+Temporary cache
+
+Dry run
+
+Report generation
+
+---
+
+# 20. Integration Tests
+
+download_dataset.py
+
+↓
 
 dataset_loader.py
-```
 
-External libraries:
+↓
 
-```text
-pathlib
+cache_manager.py
 
-hashlib
+↓
 
-pickle
+training.py
 
-json
+↓
 
-logging
+evaluation.py
 
-datetime
-
-shutil
-```
+Cache reuse must work automatically.
 
 ---
 
-# 11. Internal Architecture
+# 21. Security
 
-Recommended classes:
+Never delete
 
-```text
-CacheManager
+Official dataset
 
-CacheEntry
+Best checkpoints
 
-CacheIndex
+Configuration
 
-CacheStatistics
+Reports
 
-CachePolicy
-```
+Without explicit confirmation.
 
-Recommended helper methods:
+Never expose
 
-```text
-_create_namespace()
+HF_TOKEN
 
-_compute_key()
+Private paths
 
-_save()
-
-_load()
-
-_delete()
-
-_validate()
-
-_cleanup()
-
-_compute_statistics()
-
-_generate_report()
-```
-
-Each class shall have a single responsibility.
+Credentials
 
 ---
 
-# 12. Processing Flow
+# 22. Future Improvements
 
-```text
-Component Request
+Automatic cache compression
 
-↓
+Background cache cleanup
 
-Generate Cache Key
+Cloud cache synchronization
 
-↓
+Shared team cache
 
-Check Namespace
+Distributed cache
 
-↓
+Cache versioning
 
-Cache Exists?
-
-↓
-
-Yes → Validate
-
-↓
-
-Valid?
-
-↓
-
-Return Cached Object
-
-↓
-
-Otherwise
-
-↓
-
-Compute Object
-
-↓
-
-Store Cache
-
-↓
-
-Return Object
-```
+Intelligent eviction policy
 
 ---
 
-# 13. Cache Directory Structure
+# 23. Deliverables
 
-Recommended structure:
+After execution
 
 ```text
-cache/
-
-datasets/
-
-metadata/
-
-preprocessing/
-
-features/
-
-training/
-
-evaluation/
-
-inference/
-
 reports/
 
-index/
+cache_report.json
+
+cache_statistics.json
+
+logs/
+
+cache_manager.log
 ```
 
----
+The Cache Manager becomes the single authority responsible for every cache generated by the project.
 
-# 14. Cache Entry Model
+No script should manipulate cache directories directly.
 
-Each cache entry shall contain:
-
-```text
-key
-
-namespace
-
-version
-
-creation_date
-
-last_access
-
-expiration_date
-
-size
-
-checksum
-
-source
-
-status
-```
-
----
-
-# 15. Logging Requirements
-
-INFO
-
-- cache created
-- cache loaded
-- cache deleted
-
-WARNING
-
-- expired cache
-- missing cache
-
-ERROR
-
-- corrupted cache
-- checksum mismatch
-
-DEBUG
-
-- lookup operations
-- namespace scanning
-
----
-
-# 16. Error Handling
-
-Gracefully handle:
-
-- corrupted cache
-- invalid namespace
-- expired cache
-- permission errors
-- invalid cache key
-- missing cache directory
-
-Unexpected crashes are prohibited.
-
----
-
-# 17. Testing Strategy
-
-Unit Tests
-
-- cache creation
-- cache retrieval
-- cache deletion
-- cache expiration
-
-Integration Tests
-
-- end-to-end caching
-- namespace isolation
-
-Negative Tests
-
-- corrupted cache
-- invalid key
-- expired cache
-
-Regression Tests
-
-- cache version compatibility
-- deterministic retrieval
-
----
-
-# 18. Quality Criteria
-
-Implementation is accepted if:
-
-✓ cache entries correctly stored
-
-✓ retrieval operational
-
-✓ expiration works
-
-✓ namespaces isolated
-
-✓ reports generated
-
-✓ tests successful
-
-✓ documentation synchronized
-
----
-
-# 19. Performance Constraints
-
-Cache lookup complexity:
-
-Target: O(1)
-
-Metadata lookup:
-
-Target: O(log n)
-
-Support caches exceeding several hundred gigabytes.
-
----
-
-# 20. Security Requirements
-
-The component shall never:
-
-- overwrite cache silently;
-- expose sensitive configuration;
-- cache authentication tokens;
-- delete protected artifacts.
-
----
-
-# 21. Future Extensions
-
-Potential improvements:
-
-- Redis backend
-
-- SQLite cache index
-
-- DuckDB integration
-
-- distributed cache
-
-- cloud cache
-
-- cache compression
-
-- LRU eviction policy
-
-- LFU eviction policy
-
-- automatic optimization
-
----
-
-# 22. Related Components
-
-Dependencies:
-
-```text
-dataset_loader.py
-
-metadata_loader.py
-```
-
-Used by:
-
-```text
-audio_preprocessor.py
-
-feature_extraction.py
-
-trainer.py
-
-evaluation_pipeline.py
-
-predictor.py
-```
-
----
-
-# 23. Acceptance Checklist
-
-Implementation is accepted when:
-
-- cache service operational;
-
-- namespaces implemented;
-
-- reports generated;
-
-- integrity verification successful;
-
-- tests pass;
-
-- documentation updated.
-
----
-
-# 24. Deliverables
-
-Implementation
-
-```text
-src/data/cache_manager.py
-```
-
-Associated tests
-
-```text
-tests/data/test_cache_manager.py
-```
-
-Documentation
-
-```text
-docs/setup/06_troubleshooting.md
-
-docs/research/06_Experiment_Log.md
-```
-
-Specification
-
-```text
-specifications/data/cache_manager.md
-```
-
----
-
-# 25. Revision History
-
-| Version    | Date       | Author       | Changes               |
-| ---------- | ---------- | ------------ | --------------------- |
-| ---------- | ------     | --------     | ---------             |
-| 1.0.0      | YYYY-MM-DD | Grow Tech AI | Initial specification |
-
----
-
-# 26. Conclusion
-
-This specification defines the implementation contract for `cache_manager.py`.
-
-The component serves as the official cache service of the Grow Tech AI Research Lab. It provides deterministic, reusable and high-performance access to intermediate artifacts generated throughout the machine learning pipeline.
-
-By centralizing cache management, the project improves execution speed, reduces redundant computation and guarantees consistent behavior across experiments and future hackathons.
+Every cache operation must go through cache_manager.py.

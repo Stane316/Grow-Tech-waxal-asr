@@ -8,7 +8,7 @@
 >
 > Organization: Grow Tech AI
 >
-> Version: 1.0.0
+> Version: 2.0.0
 
 ---
 
@@ -28,15 +28,21 @@ Your objective is not only to write code, but to preserve architecture, document
 
 # Primary Mission
 
-The current repository supports the development of a multilingual Automatic Speech Recognition (ASR) system for the Google WAXAL ASR Challenge.
+The current repository develops the official multilingual Automatic Speech
+Recognition (ASR) system for the Google WAXAL ASR Challenge.
 
-The long-term objective is larger.
+The project officially adopts:
 
-Every component developed here must become reusable for future AI competitions and research projects.
+- one multilingual production model;
+- one official training pipeline;
+- one preprocessing pipeline;
+- one evaluation pipeline;
+- one inference pipeline.
 
-Think beyond the current competition.
+Alternative architectures are developed only for benchmarking and research.
 
-Build reusable engineering assets.
+The long-term objective is to transform every reusable component into a
+permanent asset of the Grow Tech AI Research Lab.
 
 ---
 
@@ -59,6 +65,30 @@ Always follow these principles.
 7. Preserve Maintainability
 
 Never prioritize short-term speed over long-term quality.
+
+---
+
+# Official Architecture Decisions
+
+Before implementing any feature, every AI agent must understand the project's
+Architecture Decision Records (ADR).
+
+Currently accepted decisions are:
+
+ADR-001
+
+Dataset downloads are filtered exclusively using the official Zindi metadata.
+
+Downloading the complete Hugging Face dataset is prohibited.
+
+ADR-002
+
+The project uses one official multilingual ASR model covering Luganda,
+Lingala and Shona.
+
+Monolingual models remain research artefacts only.
+
+Future ADRs must be treated as mandatory engineering constraints.
 
 ---
 
@@ -91,77 +121,76 @@ Documentation belongs inside **docs/**.
 
 # Mandatory Reading Order
 
-Before modifying any code, read the following documents in this order.
+Before modifying any code, read the following documents in this order
 
-## Step 1
+0. docs/ai/...
 
-docs/ai/
+1. README.md
 
-README.md
+2. SETUP.md
 
----
+3. AGENTS.md
 
-## Step 2
+4. Developer-Pack/README.md
 
-PROJECT_CONTEXT.md
+5. Developer-Pack/00_PROJECT_CONTEXT.md
 
----
+6. Developer-Pack/01_HACKATHON_SPECIFICATION.md
 
-## Step 3
+7. Developer-Pack/02_TECHNICAL_ARCHITECTURE.md
 
-ARCHITECTURE.md
+8. Developer-Pack/03_DATASET_DOCUMENTATION.md
 
----
+9. Developer-Pack/04_RESEARCH_OBJECTIVES.md
 
-## Step 4
+10. Developer-Pack/05_DEVELOPMENT_RULES.md
 
-DEVELOPMENT_GUIDE.md
+11. Developer-Pack/06_CODING_STANDARDS.md
 
----
+12. Developer-Pack/07_GIT_WORKFLOW.md
 
-## Step 5
+13. Developer-Pack/08_PROJECT_ROADMAP.md
 
-AI_RULES.md
+14. Developer-Pack/09_CURRENT_STATUS.md
 
----
+15. Developer-Pack/10_TASKS.md
 
-## Step 6
+16. Developer-Pack/11_DELIVERABLES.md
 
-TEAM_WORKFLOW.md
+17. Developer-Pack/12_VALIDATION_CHECKLIST.md
 
----
+18. Developer-Pack/13_AI_INSTRUCTIONS.md
 
-## Step 7
+19. Developer-Pack/14_EXPERIMENT_TRACKING.md
 
-QUALITY_ASSURANCE.md
+20. Developer-Pack/15_REFERENCES.md
 
----
-
-## Step 8
-
-REVIEW_PROCESS.md
-
----
-
-## Step 9
-
-TASKS.md
-
----
-
-## Step 10
-
-ROADMAP.md
-
----
-
-## Step 11
-
-CONTEXT_MEMORY.md
-
----
 
 Only after reading these documents may implementation begin.
+
+---
+
+# Official Development Constraints
+
+The following constraints are mandatory.
+
+✓ Documentation First
+
+✓ Specification First
+
+✓ Configuration-driven development
+
+✓ One multilingual production pipeline
+
+✓ Dataset validation before training
+
+✓ Deterministic experiments
+
+✓ Modular architecture
+
+✓ Full traceability
+
+These constraints override implementation preferences.
 
 ---
 
@@ -176,6 +205,12 @@ Always:
 - use logging instead of print();
 - update documentation when modifying code;
 - keep modules focused on a single responsibility.
+- import configuration from configs/
+- reuse existing modules
+- validate the dataset before training
+- respect accepted ADRs
+- keep experiments reproducible
+- explain architectural impacts
 
 Never:
 
@@ -214,6 +249,22 @@ Develop
 Main
 
 Pull Requests are mandatory.
+
+---
+
+# Model Development Policy
+
+The repository distinguishes two categories of models.
+
+Official Model
+
+The multilingual production model.
+
+Research Models
+
+Temporary benchmark models used only for scientific comparison.
+
+Only the official multilingual model may generate competition submissions.
 
 ---
 
@@ -272,6 +323,26 @@ Experiments without documentation are incomplete.
 
 ---
 
+# Experiment Classification
+
+Experiments belong to one of three categories.
+
+Benchmark
+
+Architecture comparison.
+
+Research
+
+Scientific investigation.
+
+Production
+
+Official multilingual pipeline.
+
+Production experiments have the highest priority.
+
+---
+
 # Quality Requirements
 
 Before considering any task complete, verify:
@@ -289,11 +360,37 @@ Minimum quality target:
 
 ---
 
+# AI Decision-Making Policy
+
+When multiple implementation options exist, AI agents shall prioritize:
+
+1. architectural consistency;
+
+2. reproducibility;
+
+3. maintainability;
+
+4. modularity;
+
+5. computational efficiency.
+
+Never optimize local performance at the expense of project consistency.
+
+---
+
 # Current Status
 
 Current phase:
 
-Research Laboratory Setup
+Architecture Consolidation
+
+Documentation completed
+
+Dataset engineering in progress
+
+Official baseline pending
+
+Implementation phase starting
 
 Current priorities:
 
@@ -359,6 +456,21 @@ passes review.
 
 ---
 
+# Collaboration Principles
+
+AI agents are expected to collaborate through documentation.
+
+Every implementation must:
+
+- preserve repository consistency;
+- leave clear documentation;
+- update task status;
+- remain understandable by another AI agent.
+
+A future AI agent should be able to continue development without additional explanations.
+
+---
+
 # Final Instruction
 
 If information appears missing:
@@ -373,6 +485,30 @@ Review previous decisions.
 
 Then ask for clarification only if absolutely necessary.
 
-Always prioritize consistency over speed.
+Always prioritize:
+
+Architecture
+
+↓
+
+Documentation
+
+↓
+
+Correctness
+
+↓
+
+Reproducibility
+
+↓
+
+Performance
+
+↓
+
+Speed
+
+Engineering quality always prevails over implementation speed.
 
 Welcome to Grow Tech AI.

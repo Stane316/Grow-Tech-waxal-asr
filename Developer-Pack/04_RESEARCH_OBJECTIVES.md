@@ -41,11 +41,41 @@ Beyond the competition, the project seeks to establish a reusable research frame
 
 ---
 
+# 2.1 Official Architecture Decision
+
+Decision ID
+
+ADR-002
+
+Status
+
+Accepted
+
+Official Strategy
+
+The project officially adopts a single multilingual ASR model covering all
+competition languages.
+
+The multilingual model constitutes the primary research direction.
+
+Monolingual models may be trained only for:
+
+- benchmarking;
+- ablation studies;
+- scientific comparison;
+- error analysis.
+
+They shall never replace the official multilingual pipeline.
+
 # 3. Scientific Mission
 
-Our scientific mission is to investigate engineering and machine learning strategies capable of improving speech recognition for African languages while maintaining strong generalization performance.
+Our scientific mission is to design, evaluate and optimize a single
+multilingual Automatic Speech Recognition system capable of recognizing all
+official competition languages while maintaining high robustness,
+generalization and reproducibility.
 
-Research activities must generate both competitive models and reusable scientific knowledge.
+Alternative model architectures remain part of the research program only as
+benchmark references and comparative baselines.
 
 ---
 
@@ -106,19 +136,31 @@ Reusable dataset loading and preprocessing modules.
 
 ---
 
-## Objective 4 — Evaluate Multiple ASR Architectures
+## Objective 4 — Select the Official Multilingual Architecture
 
-Candidate Models:
+Purpose
 
-- Gemma
-- Whisper
-- HuBERT
-- wav2vec 2.0
-- Future multilingual speech models
+Identify the multilingual architecture that will become the official
+competition model.
 
-Expected Outcome:
+Research Activities
 
-Comparative benchmark of model families.
+• reproduce the official baseline
+
+• benchmark multilingual architectures
+
+• compare multilingual transfer capability
+
+• evaluate computational efficiency
+
+Expected Outcome
+
+Selection of one official multilingual architecture used throughout the
+project.
+
+Notes
+
+Alternative architectures remain benchmark references only.
 
 ---
 
@@ -203,6 +245,11 @@ RQ7
 
 What techniques best improve robustness on unseen speakers?
 
+RQ8
+
+Does one unified multilingual model outperform multiple monolingual models
+under identical training conditions?
+
 ---
 
 # 8. Research Hypotheses
@@ -229,6 +276,12 @@ Experiment tracking accelerates scientific progress.
 
 Each hypothesis must be validated or rejected through experimentation.
 
+H6
+
+A single multilingual architecture provides better generalization and lower
+engineering complexity than maintaining multiple independent monolingual
+models.
+
 ---
 
 # 9. Research Axes
@@ -253,7 +306,7 @@ Deliverables:
 
 Focus:
 
-Comparison of ASR architectures.
+Selection and optimization of the official multilingual architecture.
 
 Deliverables:
 
@@ -302,6 +355,27 @@ Deliverables:
 - technical reports;
 - best practices;
 - recommendations for future projects.
+
+Axis 6 — Multilingual Transfer Learning
+
+Focus
+
+Knowledge transfer across Luganda,
+Lingala
+and
+Shona.
+
+Deliverables
+
+language interaction analysis
+
+cross-language robustness
+
+transfer learning report
+
+error distribution
+
+language confusion analysis
 
 ---
 
@@ -399,6 +473,26 @@ Research activities should generate:
 - scientific documentation.
 
 ---
+
+# Official Research Constraints
+
+Every official experiment shall
+
+✓ use the multilingual pipeline
+
+✓ preserve reproducibility
+
+✓ share identical preprocessing
+
+✓ use the same dataset
+
+✓ use identical evaluation metrics
+
+✓ use identical random seed
+
+✓ document every deviation
+
+Monolingual experiments are classified as secondary experiments.
 
 # 14. Risks
 
@@ -511,6 +605,18 @@ Competition KPIs
 - Improvement over baseline.
 - Final competition ranking.
 
+Official Model KPIs
+
+• multilingual WER
+
+• multilingual CER
+
+• performance per language
+
+• average multilingual score
+
+• cross-language robustness
+
 ---
 
 # Appendix C — Future Research Directions
@@ -526,3 +632,29 @@ Future investigations may include:
 - speech-text multimodal systems.
 
 These directions will guide future Grow Tech AI research projects beyond the Google WAXAL ASR Challenge.
+
+Appendix D — Official Research Strategy
+
+Primary Goal
+
+One multilingual production model.
+
+Secondary Goal
+
+Scientific comparison.
+
+Experimental Goal
+
+Understand multilingual transfer.
+
+Engineering Goal
+
+Reusable architecture.
+
+Competition Goal
+
+Highest leaderboard performance.
+
+Long-term Goal
+
+Reusable multilingual ASR framework for future African language challenges.

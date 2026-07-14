@@ -1,685 +1,693 @@
-# Software Design Specification (SDS)
+# dataset_validator.py — Software Specification
 
-# dataset_validator.py
+Version: 2.0
 
-> **Specification ID:** SDS-DATA-002
->
-> **Component:** dataset_validator.py
->
-> **Version:** 1.0.0
->
-> **Status:** Approved for Implementation
->
-> **Category:** Data Layer
->
-> **Project:** Google WAXAL ASR Challenge
->
-> **Organization:** Grow Tech AI Research Lab
+Status: Approved
+
+Category: Data Validation
+
+Priority: Critical
 
 ---
 
 # 1. Purpose
 
-This document specifies the complete design of the `dataset_validator.py` component.
+## Objective
 
-The purpose of this module is to verify the structural, semantic and technical integrity of every dataset before it is used by downstream components.
+Validate the integrity, consistency, completeness and quality of the official Google WAXAL ASR Challenge dataset before any downstream operation.
 
-The validator is the official data quality gate of the project.
+The validator acts as the project's official **Quality Gate**.
 
-No training, preprocessing or evaluation should begin without successful validation.
-
----
-
-# 2. Context
-
-Machine Learning pipelines are highly sensitive to data quality.
-
-Common issues include:
-
-- missing audio files
-- corrupted files
-- empty transcriptions
-- invalid metadata
-- duplicate samples
-- inconsistent sampling rates
-- malformed dataset splits
-
-Undetected problems may invalidate research results.
-
-The validator ensures that all datasets satisfy the project's quality requirements.
+No preprocessing, training, evaluation or inference script may execute if the dataset validation fails.
 
 ---
 
-# 3. Objectives
+# 2. Background
 
-The component shall:
+The Google WAXAL ASR Challenge relies on a filtered subset of the official WAXAL corpus.
 
-- validate dataset integrity;
-- verify dataset structure;
-- detect corrupted files;
-- validate metadata consistency;
-- verify split integrity;
-- detect duplicate samples;
-- generate validation reports;
-- assign an overall validation status.
+Any inconsistency may lead to:
 
----
+- invalid experiments
+- non reproducible results
+- training crashes
+- incorrect evaluation
+- leaderboard penalties
 
-# 4. Scope
-
-Included:
-
-- directory validation
-- metadata validation
-- audio validation
-- transcription validation
-- duplicate detection
-- split validation
-- statistics validation
-- report generation
-
-Excluded:
-
-- preprocessing
-- feature extraction
-- training
-- inference
-- dataset repair
+This validator guarantees that every experiment starts from a trusted dataset.
 
 ---
 
-# 5. Functional Requirements
-
-## FR-001
-
-Verify dataset existence.
-
----
-
-## FR-002
-
-Validate directory structure.
-
----
-
-## FR-003
-
-Validate required files.
-
----
-
-## FR-004
-
-Validate metadata files.
-
----
-
-## FR-005
-
-Validate audio files.
-
-Checks include:
-
-- readable
-- non-empty
-- supported format
-- valid duration
-- valid sampling rate
-
----
-
-## FR-006
-
-Validate transcriptions.
-
-Checks include:
-
-- non-empty
-- UTF-8 encoding
-- allowed characters
-
----
-
-## FR-007
-
-Validate dataset splits.
-
-Expected:
-
-- train
-- validation
-- test
-
----
-
-## FR-008
-
-Detect duplicate samples.
-
----
-
-## FR-009
-
-Detect missing samples.
-
----
-
-## FR-010
-
-Detect corrupted files.
-
----
-
-## FR-011
-
-Compute validation statistics.
-
----
-
-## FR-012
-
-Assign severity levels.
-
-Possible values:
-
-- PASS
-- WARNING
-- FAIL
-
----
-
-## FR-013
-
-Generate machine-readable report.
-
----
-
-## FR-014
-
-Generate human-readable report.
-
----
-
-## FR-015
-
-Return global validation result.
-
----
-
-# 6. Non-Functional Requirements
+# 3. Responsibilities
 
 The validator must:
 
-- support datasets larger than 1 TB;
-- stream validation when possible;
-- avoid loading the full dataset into memory;
-- support parallel validation;
-- produce deterministic reports.
+✔ verify directory structure
+
+✔ verify metadata
+
+✔ verify CSV files
+
+✔ verify dataset splits
+
+✔ verify official IDs
+
+✔ verify audio files
+
+✔ verify transcripts
+
+✔ verify language consistency
+
+✔ verify sampling rate
+
+✔ verify durations
+
+✔ detect duplicates
+
+✔ detect missing samples
+
+✔ detect corrupted files
+
+✔ generate validation reports
+
+✔ assign a validation status
 
 ---
 
-# 7. Public API
+# 4. Inputs
 
-Recommended public methods:
+Expected folders
 
 ```text
-validate_dataset()
+data/
 
-validate_split()
+    raw/
 
-validate_audio()
+    filtered/
 
-validate_transcription()
+    metadata/
 
-validate_metadata()
+reports/
 
-detect_duplicates()
+configs/
+```
 
-compute_statistics()
+Expected files
 
-generate_report()
+```text
+Train.csv
+
+Validation.csv
+
+Test.csv
+
+dataset.arrow
+
+metadata.json
+```
+
+Configuration
+
+```text
+configs/
+
+dataset.py
+
+paths.py
 ```
 
 ---
 
-# 8. Inputs
+# 5. Outputs
 
-Parameters:
-
-```text
-dataset_path
-
-split
-
-validation_level
-
-parallel
-
-report_format
-
-strict
-```
-
-Validation levels:
+Reports
 
 ```text
-basic
+reports/
 
-standard
-
-full
-```
-
----
-
-# 9. Outputs
-
-Returns:
-
-```text
-ValidationReport
-```
-
-Containing:
-
-- global status
-- detected issues
-- statistics
-- recommendations
-
-Generated reports:
-
-```text
 validation_report.json
 
 validation_report.md
+
+dataset_statistics.json
+
+validation.log
+```
+
+Validation status
+
+```text
+PASS
+
+WARNING
+
+FAIL
 ```
 
 ---
 
-# 10. Dependencies
+# 6. Validation Pipeline
 
-Internal modules:
+Step 1
 
-```text
-dataset_loader.py
-
-metadata_loader.py
-```
-
-External libraries:
-
-```text
-datasets
-
-soundfile
-
-pathlib
-
-logging
-
-hashlib
-```
-
----
-
-# 11. Internal Architecture
-
-Recommended classes:
-
-```text
-DatasetValidator
-
-ValidationReport
-
-ValidationResult
-
-ValidationIssue
-```
-
-Recommended helper methods:
-
-```text
-_validate_structure()
-
-_validate_audio()
-
-_validate_transcriptions()
-
-_validate_metadata()
-
-_validate_splits()
-
-_detect_duplicates()
-
-_generate_statistics()
-
-_generate_reports()
-```
-
-Each function must have a single responsibility.
-
----
-
-# 12. Processing Flow
-
-```text
-Start
+Verify folder structure
 
 ↓
 
-Load dataset
+Step 2
+
+Verify required files
 
 ↓
 
-Validate structure
+Step 3
+
+Load metadata
 
 ↓
 
-Validate metadata
+Step 4
+
+Validate CSV files
 
 ↓
+
+Step 5
+
+Validate IDs
+
+↓
+
+Step 6
+
+Validate dataset
+
+↓
+
+Step 7
 
 Validate audio
 
 ↓
 
-Validate transcriptions
+Step 8
+
+Validate transcripts
 
 ↓
 
-Validate splits
-
-↓
-
-Detect duplicates
-
-↓
+Step 9
 
 Compute statistics
 
 ↓
 
+Step 10
+
 Generate reports
 
 ↓
 
-Return ValidationReport
-```
+Step 11
+
+Return validation status
 
 ---
 
-# 13. Data Model
+# 7. Dataset Validation
 
-ValidationIssue
+Verify
+
+✔ number of samples
+
+✔ split consistency
+
+✔ unique IDs
+
+✔ missing IDs
+
+✔ duplicated IDs
+
+✔ language distribution
+
+✔ metadata consistency
+
+✔ orphan samples
+
+---
+
+# 8. CSV Validation
+
+Verify
+
+✔ encoding (UTF-8)
+
+✔ schema
+
+✔ mandatory columns
+
+✔ null values
+
+✔ malformed rows
+
+✔ duplicated rows
+
+✔ invalid delimiters
+
+✔ empty files
+
+---
+
+# 9. Audio Validation
+
+Every audio file must verify
+
+✔ file exists
+
+✔ readable
+
+✔ non empty
+
+✔ supported format
+
+✔ sample rate = 16 kHz
+
+✔ duration > 0
+
+✔ duration within expected range
+
+✔ no corruption
+
+✔ waveform readable
+
+---
+
+# 10. Transcript Validation
+
+Verify
+
+✔ transcript exists
+
+✔ UTF-8 encoding
+
+✔ non empty
+
+✔ no duplicated transcript
+
+✔ acceptable length
+
+✔ language consistency
+
+✔ excessive whitespace
+
+✔ unexpected characters
+
+---
+
+# 11. Language Validation
+
+Supported languages
 
 ```text
-id
-
-category
-
-severity
-
-location
-
-description
-
-recommendation
+lug
+lin
+sna
 ```
 
-ValidationReport
+Verify
+
+✔ language code valid
+
+✔ language matches metadata
+
+✔ language distribution
+
+Reject unknown languages.
+
+---
+
+# 12. Metadata Validation
+
+Verify
+
+✔ metadata exists
+
+✔ IDs consistent
+
+✔ language consistent
+
+✔ split consistent
+
+✔ audio path exists
+
+✔ transcript path exists
+
+---
+
+# 13. Dataset Statistics
+
+Compute
+
+Number of samples
+
+Hours of speech
+
+Average duration
+
+Median duration
+
+Min duration
+
+Max duration
+
+Samples per language
+
+Samples per split
+
+Vocabulary size
+
+Average transcript length
+
+Maximum transcript length
+
+Minimum transcript length
+
+Character distribution
+
+Word distribution
+
+---
+
+# 14. Quality Metrics
+
+Generate
+
+Missing samples %
+
+Duplicated IDs %
+
+Corrupted files %
+
+Empty transcripts %
+
+Average duration
+
+Median duration
+
+Audio coverage
+
+Dataset completeness score
+
+Validation score
+
+---
+
+# 15. Validation Rules
+
+Critical Errors
+
+Missing dataset
+
+Missing metadata
+
+Missing audio
+
+Missing transcript
+
+Duplicate IDs
+
+Corrupted dataset
+
+Unknown language
+
+Invalid schema
+
+↓
+
+Execution stops immediately.
+
+Warnings
+
+Long transcript
+
+Short transcript
+
+Small language imbalance
+
+Optional metadata missing
+
+↓
+
+Execution continues.
+
+---
+
+# 16. Reports
+
+Generate
 
 ```text
-status
+validation_report.md
+```
 
-statistics
+Containing
 
-issues
+Executive Summary
+
+Validation Results
+
+Detected Errors
+
+Warnings
+
+Dataset Statistics
+
+Recommendations
+
+---
+
+Generate
+
+```text
+validation_report.json
+```
+
+Machine-readable report.
+
+---
+
+Generate
+
+```text
+dataset_statistics.json
+```
+
+Reusable statistics.
+
+---
+
+# 17. Logging
+
+Generate
+
+```text
+logs/dataset_validator.log
+```
+
+Log
+
+timestamp
+
+validation step
 
 warnings
 
 errors
 
-execution_time
+duration
 
-validated_samples
+---
+
+# 18. Public API
+
+validate()
+
+verify_structure()
+
+verify_csv()
+
+verify_audio()
+
+verify_metadata()
+
+verify_ids()
+
+verify_transcripts()
+
+compute_statistics()
+
+generate_reports()
+
+summary()
+
+---
+
+# 19. CLI
+
+Default
+
+```bash
+python scripts/dataset_validator.py
+```
+
+Options
+
+```bash
+--quick
+
+--full
+
+--verify-audio
+
+--verify-csv
+
+--verify-metadata
+
+--stats
+
+--report
+
+--json
+
+--verbose
 ```
 
 ---
 
-# 14. Validation Categories
+# 20. Unit Tests
 
-Structure
+Verify
 
-Metadata
+Missing folders
 
-Audio
+Missing files
 
-Transcriptions
+Duplicate IDs
 
-Splits
+Invalid CSV
 
-Duplicates
+Corrupted audio
 
-Statistics
+Missing transcript
 
-Integrity
+Unknown language
 
-Performance
+Wrong sample rate
 
----
+Statistics generation
 
-# 15. Logging Requirements
-
-INFO
-
-- validation started
-- validation completed
-
-WARNING
-
-- suspicious sample
-- missing metadata
-
-ERROR
-
-- corrupted audio
-- invalid split
-- unreadable file
-
-DEBUG
-
-- validation details
+Report generation
 
 ---
 
-# 16. Error Handling
+# 21. Integration Tests
 
-Gracefully handle:
+download_dataset.py
 
-- inaccessible files
-- corrupted metadata
-- unsupported audio formats
-- invalid UTF-8
-- missing folders
-- incomplete datasets
+↓
 
-Unexpected crashes are prohibited.
-
----
-
-# 17. Testing Strategy
-
-Unit Tests
-
-- audio validator
-- metadata validator
-- split validator
-- duplicate detector
-
-Integration Tests
-
-- complete dataset validation
-
-Negative Tests
-
-- corrupted audio
-- missing metadata
-- duplicate samples
-- invalid transcription
-
-Regression Tests
-
-- validation reproducibility
-- report consistency
-
----
-
-# 18. Quality Criteria
-
-Accepted if:
-
-✓ all validation categories implemented
-
-✓ reports generated
-
-✓ duplicate detection operational
-
-✓ corrupted files detected
-
-✓ tests successful
-
-✓ documentation synchronized
-
----
-
-# 19. Performance Constraints
-
-Support datasets >1 TB.
-
-Streaming preferred.
-
-Parallel validation encouraged.
-
-Memory footprint <500 MB.
-
----
-
-# 20. Security Requirements
-
-The validator shall never:
-
-- modify datasets;
-- repair files automatically;
-- delete samples;
-- overwrite metadata.
-
-Validation is read-only.
-
----
-
-# 21. Future Extensions
-
-Possible improvements:
-
-- automatic repair suggestions
-
-- dataset quality scoring
-
-- anomaly detection
-
-- audio quality metrics
-
-- transcription language detection
-
-- speaker consistency analysis
-
-- dataset version comparison
-
----
-
-# 22. Related Components
-
-Dependencies:
-
-```text
 dataset_loader.py
 
-metadata_loader.py
-```
+↓
 
-Used by:
+dataset_validator.py
 
-```text
-trainer.py
+↓
 
-evaluation_pipeline.py
+EDA
 
-benchmark.py
-```
+↓
 
----
+Training
 
-# 23. Acceptance Checklist
+↓
 
-Implementation is accepted when:
+Evaluation
 
-- every validation rule implemented;
-
-- reports generated;
-
-- corrupted samples detected;
-
-- duplicate detection operational;
-
-- tests successful;
-
-- documentation updated.
+Validation must pass before continuing.
 
 ---
 
-# 24. Deliverables
+# 22. Performance Requirements
 
-Implementation
+Validation time
 
-```text
-src/data/dataset_validator.py
-```
+< 5 minutes
 
-Associated tests
+Memory
 
-```text
-tests/data/test_dataset_validator.py
-```
+< 4 GB
 
-Documentation
+Parallel audio verification
 
-```text
-docs/research/01_Dataset_Audit.md
+Progress bars
 
-docs/research/03_EDA.md
-```
-
-Specification
-
-```text
-specifications/data/dataset_validator.md
-```
+Incremental validation supported
 
 ---
 
-# 25. Revision History
+# 23. Security
 
-| Version | Date       | Author       | Changes               |
-| ------- | ---------- | ------------ | --------------------- |
-| 1.0.0   | YYYY-MM-DD | Grow Tech AI | Initial specification |
+Never expose
+
+HF_TOKEN
+
+absolute paths
+
+private metadata
+
+temporary cache
 
 ---
 
-# 26. Conclusion
+# 24. Future Improvements
 
-This specification defines the implementation contract for `dataset_validator.py`.
+Audio quality scoring
 
-The component serves as the official Data Quality Gate of the Grow Tech AI Research Lab. It guarantees that every dataset used throughout the project is structurally valid, technically consistent and scientifically reliable before entering the machine learning pipeline.
+Automatic transcript normalization
 
-By enforcing rigorous validation, this component protects experiment reproducibility, model reliability and research integrity.
+Dataset version comparison
+
+Checksum verification
+
+Cloud dataset validation
+
+Continuous validation (CI/CD)
+
+Automatic HTML reports
+
+---
+
+# 25. Deliverables
+
+After execution
+
+```text
+reports/
+
+validation_report.md
+
+validation_report.json
+
+dataset_statistics.json
+
+logs/
+
+dataset_validator.log
+```
+
+The validator becomes the official Quality Gate of the project.
+
+Every experiment must begin with a successful validation.
+
+No downstream script is authorized to run if validation status is FAIL.

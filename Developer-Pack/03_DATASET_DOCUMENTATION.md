@@ -1,528 +1,278 @@
-# Grow Tech AI Research Lab
+# 03_DATASET_DOCUMENTATION.md
 
-# 03_DATASET_DOCUMENTATION
+# Developer Pack
 
-> **Document ID:** BFADP-03
->
-> **Version:** 1.0.0
->
-> **Status:** Active
->
-> **Category:** Dataset Specification
->
-> **Project:** Google WAXAL ASR Challenge
->
-> **Organization:** Grow Tech AI
+## Google WAXAL ASR Challenge
+
+Version : 2.0.0
+
+Statut : Référence officielle
 
 ---
 
-# 1. Purpose of this Document
+# 1. Objectif du document
 
-This document defines the official specification of the datasets used throughout the project.
+Ce document décrit la structure officielle du dataset utilisé dans le projet Grow Tech AI pour le Google WAXAL ASR Challenge.
 
-Its objectives are to:
+Il constitue la référence unique concernant :
 
-- describe the available datasets;
-- document their structure;
-- explain how they should be downloaded;
-- define preprocessing rules;
-- establish validation procedures;
-- guarantee reproducibility;
-- provide a common understanding for every developer and AI assistant.
+- l'organisation des données ;
+- les sources officielles ;
+- les métadonnées ;
+- les règles de téléchargement ;
+- les contraintes techniques ;
+- les décisions d'architecture relatives au dataset.
 
-This document serves as the single source of truth regarding all project data.
-
----
-
-# 2. Dataset Overview
-
-The project relies on two complementary data sources.
-
-## Official Competition Package
-
-Platform:
-
-Zindi
-
-Contents:
-
-- Starter Notebook
-- Sample Submission
-- CSV metadata
-- Competition instructions
-
-Purpose:
-
-Provide the minimum resources required to participate in the challenge.
+Tous les développeurs, collaborateurs et agents IA doivent s'y conformer.
 
 ---
 
-## Official Speech Dataset
+# 2. Sources officielles
 
-Platform:
+Le projet s'appuie exclusivement sur les ressources publiées par les organisateurs de la compétition.
 
-Hugging Face
+## Plateforme de compétition
 
-Dataset:
+- Zindi — Google WAXAL ASR Challenge
 
-Google WAXAL NLP
+## Dataset
 
-Purpose:
+- Hugging Face — `google/WaxalNLP`
 
-Provide multilingual speech recordings together with their associated transcriptions and metadata.
+## Documentation officielle
 
-This repository constitutes the authoritative source of training data.
+- Notebook officiel fourni par les organisateurs
+- Métadonnées (`Train.csv`, `Validation.csv`, `Test.csv`)
+- Règlement de la compétition
 
----
-
-# 3. Dataset Architecture
-
-The complete dataset is organized into three logical layers.
-
-## Layer 1 — Metadata
-
-Contains:
-
-- identifiers
-- language
-- split
-- speaker information (when available)
-- recording information
-- transcription references
+Aucune source tierce ne doit être utilisée sans validation préalable.
 
 ---
 
-## Layer 2 — Audio
+# 3. Description générale du dataset
 
-Contains speech recordings.
+Le dataset WAXAL est un corpus de reconnaissance automatique de la parole (ASR) destiné à entraîner et évaluer des modèles multilingues pour plusieurs langues africaines.
 
-Typical characteristics:
+Le dépôt Hugging Face contient davantage de données que celles effectivement utilisées pendant la compétition.
 
-- waveform audio
-- multilingual recordings
-- variable duration
-- multiple speakers
-- diverse acoustic conditions
+Le sous-ensemble officiel est défini exclusivement par les fichiers de métadonnées fournis par Zindi.
 
 ---
 
-## Layer 3 — Transcriptions
+# 4. Langues officielles
 
-Contains reference text associated with audio samples.
+Le projet prend en charge les trois langues de la compétition :
 
-These transcriptions are used for:
+- Luganda
+- Lingala
+- Shona
 
-- supervised learning;
-- evaluation;
-- quality analysis.
-
----
-
-# 4. Competition Splits
-
-The competition distinguishes several data partitions.
-
-## Training Split
-
-Purpose:
-
-Model training.
-
-Contains:
-
-- audio
-- transcriptions
-- metadata
+La stratégie retenue est un **modèle multilingue unique** couvrant simultanément ces trois langues.
 
 ---
 
-## Validation Split
+# 5. Architecture des données
 
-Purpose:
-
-Hyperparameter tuning.
-
-Contains:
-
-- audio
-- transcriptions
-- metadata
-
----
-
-## Public Test Split (Phase 1)
-
-Purpose:
-
-Leaderboard evaluation.
-
-Contains:
-
-- audio
-- metadata required for submission
-
-Ground-truth labels remain hidden for evaluation.
-
----
-
-## Hidden Test Split (Phase 2)
-
-Purpose:
-
-Final evaluation.
-
-Characteristics:
-
-- unseen recordings;
-- unseen speakers;
-- no metadata;
-- no language labels;
-- no transcriptions.
-
-This split measures true model generalization.
-
----
-
-# 5. Dataset Access
-
-Primary access method:
-
-Hugging Face Datasets Library.
-
-Authentication:
-
-Hugging Face User Access Token.
-
-The dataset must never be manually modified.
-
-All downloads should remain reproducible through scripts.
-
----
-
-# 6. Local Repository Organization
-
-Recommended structure:
-
-```
+```text
 data/
-
-raw/
-processed/
-cache/
-external/
-metadata/
+│
+├── metadata/
+│   ├── Train.csv
+│   ├── Validation.csv
+│   └── Test.csv
+│
+├── raw/
+│   ├── luganda/
+│   ├── lingala/
+│   └── shona/
+│
+├── cache/
+│
+└── reports/
 ```
 
-## raw/
+Les fichiers de métadonnées décrivent les échantillons à utiliser.
 
-Original downloaded files.
+Les fichiers audio sont stockés dans `data/raw/`.
 
-Read-only.
-
----
-
-## processed/
-
-Preprocessed data.
-
-Generated automatically.
+Les rapports et caches sont générés automatiquement par les scripts.
 
 ---
 
-## cache/
+# 6. Métadonnées officielles
 
-Temporary cache generated by Hugging Face.
+Trois fichiers CSV définissent le corpus de la compétition :
 
-Can be safely regenerated.
+- `Train.csv`
+- `Validation.csv`
+- `Test.csv`
 
----
+Ces fichiers contiennent notamment :
 
-## external/
+- identifiant de l'échantillon ;
+- langue ;
+- transcription ;
+- informations complémentaires selon le split.
 
-Optional publicly available external datasets.
-
-Every external resource must be documented.
-
----
-
-## metadata/
-
-Generated metadata files.
-
-Examples:
-
-- statistics
-- summaries
-- manifests
+Ils constituent la référence unique pour sélectionner les données.
 
 ---
 
-# 7. Dataset Loading Strategy
+# 7. Décision d'architecture ADR-001
 
-The official loading mechanism relies on the Hugging Face `datasets` library.
+## Téléchargement filtré par les IDs Zindi
 
-The project wraps this mechanism inside:
+### Statut
 
-```
-src/data/
+Acceptée.
 
-dataset_loader.py
-dataset_validator.py
-metadata_loader.py
-cache_manager.py
-```
+### Décision
 
-No notebook should contain production loading logic.
+Le projet ne téléchargera jamais l'intégralité du dataset Hugging Face.
 
----
+Les téléchargements seront effectués uniquement à partir des identifiants présents dans les fichiers :
 
-# 8. Dataset Validation
+- `Train.csv`
+- `Validation.csv`
+- `Test.csv`
 
-Every dataset download must be validated before use.
+### Justification
 
-Validation includes:
+Cette approche :
 
-- dataset availability;
-- split integrity;
-- missing values;
-- corrupted files;
-- duplicate samples;
-- metadata consistency.
-
-Validation results should be stored in the experiment logs.
+- réduit fortement l'espace disque utilisé ;
+- diminue le temps de téléchargement ;
+- évite les données inutiles ;
+- garantit la reproductibilité ;
+- assure un alignement strict avec la compétition.
 
 ---
 
-# 9. Audio Specification
+# 8. Pipeline officiel des données
 
-Every audio sample should be verified for:
+Le pipeline adopté est le suivant :
 
-- sampling rate;
-- duration;
-- channel configuration;
-- amplitude range;
-- clipping;
-- silent recordings.
-
-Unexpected values must be reported.
-
----
-
-# 10. Text Specification
-
-Every transcription should be analyzed for:
-
-- encoding;
-- Unicode normalization;
-- empty labels;
-- punctuation;
-- multilingual consistency.
-
-Text preprocessing must preserve semantic content.
-
----
-
-# 11. Metadata Specification
-
-Metadata should include, whenever available:
-
-- sample identifier;
-- split;
-- language;
-- speaker identifier;
-- gender;
-- recording attributes.
-
-The project must remain functional even if some metadata fields are unavailable.
-
----
-
-# 12. Preprocessing Policy
-
-Raw data must never be altered.
-
-Preprocessing outputs should be stored separately.
-
-Typical operations include:
-
-- resampling;
-- normalization;
-- silence trimming;
-- text normalization;
-- tokenization.
-
-Every transformation must be reproducible.
-
----
-
-# 13. External Data Policy
-
-External datasets are permitted only if:
-
-- publicly accessible;
-- legally usable;
-- documented;
-- reproducible.
-
-Every additional dataset must be declared in the final competition documentation.
-
----
-
-# 14. Storage Requirements
-
-The complete WAXAL dataset is large.
-
-Recommendations:
-
-- sufficient SSD storage;
-- dedicated cache directory;
-- avoid unnecessary duplication.
-
-Intermediate files should be periodically cleaned.
-
----
-
-# 15. Data Security
-
-The repository must never contain:
-
-- downloaded raw datasets;
-- cache files;
-- credentials;
-- generated checkpoints.
-
-Only scripts and metadata should be version controlled.
-
----
-
-# 16. Dataset Lifecycle
-
-The data lifecycle follows this sequence:
-
-```
-Authentication
-
-↓
-
-Download
-
-↓
-
-Validation
-
-↓
-
-Metadata Analysis
-
-↓
-
-Exploratory Analysis
-
-↓
-
-Preprocessing
-
-↓
-
-Training
-
-↓
-
-Evaluation
-
-↓
-
-Inference
-
-↓
-
-Submission
-
-↓
-
-Archiving
+```text
+Métadonnées Zindi
+        │
+        ▼
+Extraction des IDs
+        │
+        ▼
+Téléchargement filtré
+        │
+        ▼
+Validation du dataset
+        │
+        ▼
+Création du cache
+        │
+        ▼
+Prétraitement
+        │
+        ▼
+Entraînement
 ```
 
-Every stage must be documented.
+Aucun entraînement ne peut démarrer sans validation préalable.
 
 ---
 
-# 17. Relationship with Other Documents
+# 9. Validation des données
 
-This document extends:
+Avant toute utilisation, le pipeline vérifie :
 
-- 00_PROJECT_CONTEXT.md
-- 01_HACKATHON_SPECIFICATION.md
-- 02_TECHNICAL_ARCHITECTURE.md
+- présence des métadonnées ;
+- présence des fichiers audio ;
+- cohérence des identifiants ;
+- langues valides ;
+- transcriptions présentes ;
+- fichiers lisibles ;
+- absence de doublons ;
+- intégrité générale du dataset.
 
-It directly supports:
-
-- docs/research/01_Dataset_Audit.md
-- docs/research/02_Dataset_Anatomy.md
-- docs/research/03_EDA.md
-- src/data/
-- scripts/download_dataset.py
-- scripts/prepare_dataset.py
+Toute anomalie bloque le pipeline.
 
 ---
 
-# 18. Maintenance Policy
+# 10. Politique de téléchargement
 
-This document should be updated whenever:
+Le téléchargement doit respecter les règles suivantes :
 
-- the dataset changes;
-- new versions are released;
-- preprocessing evolves;
-- validation rules are modified;
-- additional public datasets are introduced.
+- téléchargement filtré uniquement ;
+- reprise automatique (`resume`) en cas d'interruption ;
+- réutilisation du cache ;
+- validation après téléchargement ;
+- génération d'un rapport de téléchargement.
 
----
-
-# 19. Conclusion
-
-The dataset constitutes the scientific foundation of the Grow Tech AI Research Lab.
-
-Its quality, organization and reproducibility directly determine the reliability of every experiment performed within the project.
-
-Maintaining a rigorous and well-documented data management process is therefore essential for producing trustworthy research outcomes and competitive ASR systems.
+Le téléchargement complet du dataset est interdit.
 
 ---
 
-# Appendix A — Official Data Sources
+# 11. Configuration Hugging Face
 
-Primary sources:
+Le projet utilise un cache dédié :
 
-- Google WAXAL ASR Challenge (Zindi)
-- Google WAXAL NLP Dataset (Hugging Face)
+```text
+HF_HOME=cache/huggingface
+```
 
-These platforms constitute the only official sources of truth for the competition data.
+Pré-requis obligatoires :
 
----
-
-# Appendix B — Related Research Documents
-
-Detailed analyses are available in:
-
-- Dataset_Audit.md
-- Dataset_Anatomy.md
-- EDA.md
-- Baseline_Analysis.md
-- Related_Work.md
-
-These reports complement the present specification with empirical analyses and experimental findings.
+1. créer un compte Hugging Face ;
+2. accepter la licence Gemma 3n si nécessaire ;
+3. générer un token d'accès ;
+4. exécuter `huggingface-cli login`.
 
 ---
 
-# Appendix C — Future Evolution
+# 12. Organisation des scripts
 
-Future versions of this document should incorporate:
+Les principaux composants liés au dataset sont :
 
-- complete dataset statistics;
-- language distribution tables;
-- speaker distribution analyses;
-- recording quality metrics;
-- preprocessing benchmarks;
-- data version history;
-- links to experiment reports.
+- `download_dataset.py`
+- `dataset_loader.py`
+- `dataset_validator.py`
+- `metadata_loader.py`
+- `cache_manager.py`
 
-This evolution will progressively transform the document into the definitive data reference for the Grow Tech AI Research Lab.
+Tous doivent respecter les décisions d'architecture documentées ici.
+
+---
+
+# 13. Bonnes pratiques
+
+Les développeurs doivent :
+
+- utiliser exclusivement les fichiers de métadonnées officiels ;
+- ne jamais modifier les CSV d'origine ;
+- conserver la structure du dossier `data/` ;
+- centraliser les paramètres dans `configs/dataset.py` ;
+- documenter toute évolution du pipeline.
+
+---
+
+# 14. Risques identifiés
+
+Les principaux risques sont :
+
+- téléchargement du dataset complet par erreur ;
+- métadonnées obsolètes ;
+- cache corrompu ;
+- incohérence entre les fichiers audio et les CSV ;
+- licence Hugging Face non acceptée ;
+- environnement différent entre collaborateurs.
+
+Ces risques sont traités par les mécanismes de validation et de contrôle décrits dans ce document.
+
+---
+
+# 15. Références
+
+- Documentation officielle Zindi
+- Dataset Hugging Face `google/WaxalNLP`
+- Notebook officiel de la compétition
+- `specifications/infrastructure/download_dataset.md`
+- `specifications/data/dataset_loader.md`
+- `configs/dataset.py`
+- `docs/architecture/ARCHITECTURE_DECISIONS.md` (à créer)
